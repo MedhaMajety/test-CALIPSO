@@ -56,6 +56,7 @@ output_csv_filename="output.csv"
 outputfile=open(output_csv_filename,'w')
 
 FILE_NAME = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L2_VFM-Standard-V4-10.2014-02-13T05-20-10ZD_Subset.hdf'
+FILE_NAME2 = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L1-Standard-V4-10.2014-02-13T05-20-10ZD_Subset (2)'
 
 # Identify the data field.
 DATAFIELD_NAME = 'Feature_Classification_Flags'
@@ -71,10 +72,12 @@ latitude = hdf.select('Latitude')
 lat = latitude[:]
 longitude = hdf.select('Longitude')
 lon= longitude[:]
-profile_UTC_Time= hdf.select('Profile_UTC_Time')
-time= profile_UTC_Time[:]        
+profile_Time= hdf.select('Profile_Time')
+time= profile_Time[:]        
 feature_classification_flags = hdf.select('Feature_Classification_Flags')
 flags= feature_classification_flags[:]
+profile_time_Level1 = hdf.select('Profile_Time')
+time_l1= profile_time_Level1[:]
 #altitude = hdf.select('Feature_Classification_Flags')
 #alt=altitude[:]
 
@@ -109,23 +112,48 @@ for j in range (0,103):
     #print (time_array[j])
     j =j+1
 '''
+'''
 j=0
 time_array = []
 for j in range (0,103):
     timestamp = time[volcanic_ash_indices[0][j]][0]
     value=datetime.utcfromtimestamp(timestamp)
     time_array.append(value)
-    #print (time_array[j])
+    print (time_array[j])
     j =j+1
 #utc = datetime(1980, 1, 6) + timedelta(seconds=1092121243.0 - (35 - 19))
+    '''
+#
+
+j=0
+time_array = []
+timestamp_array = []
+for j in range (0,103):
+    timestamp = time[volcanic_ash_indices[0][j]][0]
+    timestamp_array.append(timestamp)
+    value = datetime.datetime.fromtimestamp(timestamp)
+    #print(value.strftime('%Y-%m-%d %H:%M:%S'))
+    time_array.append(value.strftime('%Y-%m-%d %H:%M:%S'))
+    #print (time_array[j])
+    j =j+1
+
+l=0
+m=time_array[l]
+for l in range (0,103):    
+    def find_nearest(time_l1, m):
+        time_l1 = np.asarray(time_l1)
+        idx = (np.abs(time_l1 - m)).argmin()
+        return time_l1[idx]
+        print(find_nearest(time_l1, value))
+        # 0.568743859261
+    l+=1
 '''
 j=0
 time_array = []
 for j in range (0,103):
     timestamp = time[volcanic_ash_indices[0][j]][0]
     value = datetime.datetime.fromtimestamp(timestamp)
-    value.strftime=value.strftime('%Y-%m-%d %H:%M:%S')
-    print(value.strftime('%Y-%m-%d %H:%M:%S'))
+    #print(value.strftime('%Y-%m-%d %H:%M:%S'))
     time_array.append(value.str('%Y-%m-%d %H:%M:%S'))
     #print (time_array[j])
     j =j+1
