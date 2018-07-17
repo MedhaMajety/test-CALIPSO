@@ -44,8 +44,24 @@ import datetime
 import time
 #from grain import Grain
 from pkg_resources import resource_filename
-DEFAULT_LEAP_SECONDS = resource_filename(__name__, 'leap-seconds')#check using this name 
 
+# returns dictionary containing CAL_LID_L1 index, Profile_Time_val, attenuated_backscatter array
+def find_nearest(time_l1, test_time):
+    dict_out={}
+    try:
+        time_l1 = np.asarray(time_l1)
+        idx = (np.abs(time_l1 - test_time)).argmin()
+        
+        dict_out['index']=idx
+        dict_out['Profile_Time_val']=time_l1[idx][0]
+        dict_out['attenuated_backscatter']=att_back[idx]
+        #print ('CAL_LID_L1 index:',idx,'CAL_LID_L2_VFM Profile_Time:',test_time)
+    except Exception as e:
+        print(e,test_time)
+    return dict_out
+
+DEFAULT_LEAP_SECONDS = resource_filename(__name__, 'leap-seconds')#check using this name 
+DIFFERENCE_BETWEEN_TIMES = 0.744
 #from mpl_toolkits.basemap 
 #import Basemap
 #class Grain(object):
@@ -55,29 +71,31 @@ DEFAULT_LEAP_SECONDS = resource_filename(__name__, 'leap-seconds')#check using t
 output_csv_filename="output.csv"
 outputfile=open(output_csv_filename,'w')
 
-FILE_NAME = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L2_VFM-Standard-V4-10.2014-02-13T05-20-10ZD_Subset.hdf'
-FILE_NAME2 = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L1-Standard-V4-10.2014-02-13T05-20-10ZD_Subset (2)'
+LID_LEV2 = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L2_VFM-Standard-V4-10.2014-02-13T05-20-10ZD_Subset.hdf'
+LID_LEV1 = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L1-Standard-V4-10.2014-02-13T05-20-10ZD_Subset.hdf'
 
 # Identify the data field.
 DATAFIELD_NAME = 'Feature_Classification_Flags'
 
-hdf = SD(FILE_NAME, SDC.READ)
-        
+read_L2 = SD(LID_LEV2, SDC.READ)
+read_L1 = SD(LID_LEV1, SDC.READ)        
 # Read dataset.
-data2D = hdf.select(DATAFIELD_NAME)
+data2D = read_L2.select(DATAFIELD_NAME)
 data = data2D[:,:]
 
 # Read geolocation datasets.
-latitude = hdf.select('Latitude')
+latitude = read_L2.select('Latitude')
 lat = latitude[:]
-longitude = hdf.select('Longitude')
+longitude = read_L2.select('Longitude')
 lon= longitude[:]
-profile_Time= hdf.select('Profile_Time')
+profile_Time= read_L2.select('Profile_Time')
 time= profile_Time[:]        
-feature_classification_flags = hdf.select('Feature_Classification_Flags')
+feature_classification_flags = read_L2.select('Feature_Classification_Flags')
 flags= feature_classification_flags[:]
-profile_time_Level1 = hdf.select('Profile_Time')
+profile_time_Level1 = read_L1.select('Profile_Time')
 time_l1= profile_time_Level1[:]
+attenuated_backscatter = read_L1.select('Total_Attenuated_Backscatter_532')
+att_back = attenuated_backscatter[:]
 #altitude = hdf.select('Feature_Classification_Flags')
 #alt=altitude[:]
 
@@ -124,7 +142,7 @@ for j in range (0,103):
 #utc = datetime(1980, 1, 6) + timedelta(seconds=1092121243.0 - (35 - 19))
     '''
 #
-
+'''
 j=0
 time_array = []
 timestamp_array = []
@@ -136,17 +154,145 @@ for j in range (0,103):
     time_array.append(value.strftime('%Y-%m-%d %H:%M:%S'))
     #print (time_array[j])
     j =j+1
+'''
+j=0
+og_time_array = []
+for j in range(0,103):
+    og_time_array.append(time[volcanic_ash_indices[0][j]][0])
+j+=1
+    
+i=0
+for i in range (0,103):
+    #for dim1 in (volcanic_ash_indices[1]):
+        #if volcanic_ash_indices[1][i]>=1 and (volcanic_ash_indices[1][i]<=165):
+        #type='high'
+        if volcanic_ash_indices[1][i]>=1 and volcanic_ash_indices[1][i]<=55:
+            test_time = og_time_array[i]
+            print (test_time,"test 1")
+            
 
-l=0
-m=time_array[l]
-for l in range (0,103):    
-    def find_nearest(time_l1, m):
-        time_l1 = np.asarray(time_l1)
-        idx = (np.abs(time_l1 - m)).argmin()
-        return time_l1[idx]
-        print(find_nearest(time_l1, value))
-        # 0.568743859261
-    l+=1
+        elif volcanic_ash_indices[1][i]>=55 and volcanic_ash_indices[1][i]<=110:
+               test_time = float(1/3*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 2")
+            
+        
+        elif volcanic_ash_indices[1][i]>=111 and volcanic_ash_indices[1][i]<=165:
+               test_time = float(2/3*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 3")
+            
+                
+    #else:
+     #   if volcanic_ash_indices[1][i]>=166 and volcanic_ash_indices[1][i]<=1165:
+      #      type='medium'
+        elif volcanic_ash_indices[1][i]>=166 and volcanic_ash_indices[1][i]<=365:
+              test_time = og_time_array[i]
+              print (test_time,"test 4")
+              
+
+        elif volcanic_ash_indices[1][i]>=366 and volcanic_ash_indices[1][i]<=565:
+               test_time = float(0.2*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 5")
+            
+        
+        elif volcanic_ash_indices[1][i]>=566 and volcanic_ash_indices[1][i]<=765:
+               test_time = float(0.4*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 6")
+            
+
+        elif volcanic_ash_indices[1][i]>=766 and volcanic_ash_indices[1][i]<=965:
+               test_time = float(0.6*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 7") 
+                                    
+        elif volcanic_ash_indices[1][i]>=966 and volcanic_ash_indices[1][i]<=1165:
+               test_time = float(0.8*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 8") 
+             #if volcanic_ash_indices[1][i]>=1166 & volcanic_ash_indices[1][i]<=5515:
+        #   type='low'
+        
+        elif volcanic_ash_indices[1][i]>=1166 and volcanic_ash_indices[1][i]<=1455:
+             test_time = og_time_array[i]
+             print (test_time,"test 9") 
+             
+        elif volcanic_ash_indices[1][i]>=1456 and volcanic_ash_indices[1][i]<=1745:
+               test_time = float(1/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 10") 
+               
+        elif volcanic_ash_indices[1][i]>=1746 and volcanic_ash_indices[1][i]<=2035:
+               test_time = float(2/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 11")
+               
+        elif volcanic_ash_indices[1][i]>=2036 and volcanic_ash_indices[1][i]<=2325:
+               test_time = float(3/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 12")
+               
+        elif volcanic_ash_indices[1][i]>=2326 and volcanic_ash_indices[1][i]<=2615:
+               test_time = float(4/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 13") 
+               
+        elif volcanic_ash_indices[1][i]>=2616 and volcanic_ash_indices[1][i]<=2905:
+               test_time = float(5/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 14")     
+               
+        elif volcanic_ash_indices[1][i]>=2906 and volcanic_ash_indices[1][i]<=3195:
+               test_time = float(6/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 15")   
+               
+        elif volcanic_ash_indices[1][i]>=3196 and volcanic_ash_indices[1][i]<=3485:
+               test_time = float(7/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 16")   
+             
+        elif volcanic_ash_indices[1][i]>=3486 and volcanic_ash_indices[1][i]<=3775:
+               test_time = float(8/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 17")
+             
+        elif volcanic_ash_indices[1][i]>=3776 and volcanic_ash_indices[1][i]<=4065:
+               test_time = float(9/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 18")
+             
+        elif volcanic_ash_indices[1][i]>=4066 and volcanic_ash_indices[1][i]<=4355:
+               test_time = float(10/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 19")
+             
+        elif volcanic_ash_indices[1][i]>=4356 and volcanic_ash_indices[1][i]<=4645:
+               test_time = float(11/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 20")
+             
+        elif volcanic_ash_indices[1][i]>=4646 and volcanic_ash_indices[1][i]<=4935:
+               test_time = float(12/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 21")
+             
+        elif volcanic_ash_indices[1][i]>=4936 and volcanic_ash_indices[1][i]<=5225:
+               test_time = float(13/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 22")
+             
+        elif volcanic_ash_indices[1][i]>=5226 and volcanic_ash_indices[1][i]<=5515:
+               test_time = float(12/15*DIFFERENCE_BETWEEN_TIMES)
+               test_time= test_time+ og_time_array[i]
+               print (test_time,"test 23")
+               
+        nearest=find_nearest(time_l1, test_time)
+        print(nearest['index'],nearest['Profile_Time_val'])
+
+i+=1
 '''
 j=0
 time_array = []
@@ -374,7 +520,7 @@ for i in range (0,103):
     #c=volcanic_ash_indices[0][a]
     #d=volcanic_ash_indices[1][b]
     #print(lat[dim0][i],',',lon[dim0][i],',',time[dim0][i],",",flags[c][d])
-    output_arr=[i, lat[volcanic_ash_indices[0][i]][0], lon[volcanic_ash_indices[0][i]][0], time_array[i],altitude_array[i], 'Vol Ash']
+    output_arr=[i, lat[volcanic_ash_indices[0][i]][0], lon[volcanic_ash_indices[0][i]][0],altitude_array[i], 'Vol Ash']
     output_string=','.join(map(str,output_arr))
     print(output_string)
     outputfile.write(output_string)
@@ -693,7 +839,7 @@ norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
 
 long_name = 'Feature Type (Bits 1-3) in Feature Classification Flag'
-basename = os.path.basename(FILE_NAME)
+basename = os.path.basename(LID_LEV2)
 plt.contourf(latitude, altitude, np.rot90(data,1), cmap=cmap)
 plt.title('{0}\n{1}'.format(basename, long_name))
 plt.xlabel('Latitude (degrees north)')
@@ -709,4 +855,6 @@ cb.ax.set_yticklabels(['Others','', 'Cloud'], fontsize=6)
 # plt.show()
 pngfile = "{0}.v.py.png".format(basename)
 fig.savefig(pngfile)
+
+
     
