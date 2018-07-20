@@ -1,0 +1,1 @@
+output.csv and plotting_volcanic_ash_points_CALIPSO.kml should be in this directory if bin/Extracting_Filtering_Visualizing_CALIPSO_Data_Vol_Ash.py executed correctly
