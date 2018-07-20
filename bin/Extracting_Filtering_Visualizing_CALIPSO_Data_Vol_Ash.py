@@ -46,7 +46,7 @@ DIFFERENCE_BETWEEN_TIMES = 0.744
 #making an output csv file to transfer all the python code to and then writing
 att_back_arr=[]
 att_back_arr_indices=[]
-output_csv_filename="output.csv"
+output_csv_filename="../output/output.csv"
 outputfile=open(output_csv_filename,'w')
 #LID_LEV2 = 'C:/Users/defadmin/Desktop/Medha_Majety/vfm_plot/CAL_LID_L2_VFM-Standard-V4-10.2014-02-13T05-20-10ZD_Subset.hdf'
 LID_LEV2 = '../data/CAL_LID_L2_VFM-Standard-V4-10.2014-02-13T05-20-10ZD_Subset.hdf'
@@ -579,7 +579,7 @@ def writekml(data_dict,output_filename):
     outputfile.close()
     return
 #saves into test-CALIPSO>bin> you can name the file to whatever you want to
-output_filename="plotting_volcanic_ash_points_CALIPSO.kml"
+output_filename="../output/plotting_volcanic_ash_points_CALIPSO.kml"
 #prints out all the level 1 data
 #by doing the same as above, instead just calling on the dictonary and adding the backscatter, time, and names
 lon_lat_alt_arr=[]
